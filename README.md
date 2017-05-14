@@ -1,16 +1,1 @@
-# blockchain-kyc
-A blockchain KYC project based on hyperledger/fabric
-
-this is a project created on hyperledger hackathon by cibfintech
-
-## 理念
-这个项目基于以下理念创建:
-
-- 用户信息来源的可追溯性
-- 用户信息查看需要获得授权
-
-除了应用于KYC领域之外，还可以应用到其它领域，如反欺诈信息共享、企业黑名单信息共享等
-
-## 原理
-基于hyperledger fabric v0.6创建，参与的各方组成一个联盟链，使用智能合约来控制用户信息的读写权限。
-区块链上存储的信息都是经过用户公钥加密，用户使用私钥来授权访问。
+# blockchain-kycA blockchain KYC project based on hyperledger/fabricthis is a project created on hyperledger hackathon by cibfintech## 理念这个项目基于以下理念创建:- 用户信息来源的可追溯性- 用户信息查看需要获得授权除了应用于KYC领域之外，还可以应用到其它领域，如反欺诈信息共享、企业黑名单信息共享等## 原理基于hyperledger fabric v0.6创建，参与的各方组成一个联盟链，使用智能合约来控制用户信息的读写权限。区块链上存储的信息都是经过用户公钥加密，用户使用私钥来授权访问。## 配置### Membersrvc.yaml1. Enable ACA. aca.enable = true2. 修改aca.attributesattribute-entry-0: icbc;cibfintech;role;writer;2015-01-01T00:00:00-03:00;;              attribute-entry-1: cib;cibfintech;role;reader;2015-01-01T00:00:00-03:00;2018-07-12T23:59:59-03:00;               attribute-entry-2: cibfintech;cibfintech;role;writer;2015-01-01T00:00:00-03:00;;### core.yamlsecurity.enable=true## Rest### Registrar#### Register icbccurl -X POST localhost:7050/registrar -d '{  "enrollId": "icbc",  "enrollSecret": "123456"}'#### Register cibcurl -X POST localhost:7050/registrar -d '{  "enrollId": "cib",  "enrollSecret": "123456"}'### Deploycurl -X POST localhost:7050/chaincode -d '{  "jsonrpc": "2.0",  "method": "deploy",  "params": {    "type": 1,    "chaincodeID":{        "path": "github.com/hyperledger/fabric/kyc/chaincode"    },    "ctorMsg": {        "args":["init", "writer"]    },    "secureContext": "icbc"  },  "id": 1}'### invokecurl -X POST localhost:7050/chaincode -d '{  "jsonrpc": "2.0",  "method": "invoke",  "params": {      "type": 1,      "chaincodeID":{          "name":"078bba00c70056820cfd05af69b53c6cee6314b87cbd312200374dda90e827c42e2564166227f51dd7ccc6eb41c51af5c8fa688f2dcf951ae5f56072230e8f0f"      },      "ctorMsg": {         "args":["putCustomerInfo","user123","userabc"]      },       "attributes": ["role"],      "secureContext": "icbc"  },  "id": 3}'### Querycurl -X POST localhost:7050/chaincode -d '{  "jsonrpc": "2.0",  "method": "query",  "params": {      "type": 1,      "chaincodeID":{          "name":"bbe9010c5fa9a0232509aacfdf2334bec449164de25ea0c4147402354f9237c84fb2b44817d0f01bf3595d45e5dfe755ebf3b47b9983042bf5bebeaf5e33ae77"      },      "ctorMsg": {         "args":["queryCustomerInfo", "user123"]      },       "attributes": ["role"],      "secureContext": "cib"  },  "id": 3}'
